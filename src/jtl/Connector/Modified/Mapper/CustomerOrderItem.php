@@ -1,8 +1,6 @@
 <?php
 namespace jtl\Connector\Modified\Mapper;
 
-use jtl\Connector\Core\Logger\Logger;
-
 class CustomerOrderItem extends BaseMapper
 {
     protected $mapperConfig = array(
@@ -13,13 +11,14 @@ class CustomerOrderItem extends BaseMapper
         "identity" => "getId",
         "mapPull" => array(
             "id" => "orders_products_id",
-            "productId" => null,
+            "productId" => "products_id",
             "customerOrderId" => "orders_id",
             "quantity" => "products_quantity",
-            "name" => null,
+            "name" => "products_name",
             "price" => null,
             "vat" => "products_tax",
-            "sku" => null,
+            "sku" => "products_model",
+            "variations" => "CustomerOrderItemVariation|addVariation",
             "type" => null
         ),
         "mapPush" => array(
@@ -99,22 +98,7 @@ class CustomerOrderItem extends BaseMapper
 
         return $return;
     }
-    
-    protected function sku($data)
-    {
-        $attributeData = $this->db->query(
-            sprintf("SELECT * FROM orders_products_attributes WHERE orders_id = %s AND orders_products_id = %s",
-                $data['orders_id'], $data['orders_products_id']
-            )
-        );
-        
-        if (isset($attributeData[0]['attributes_model'])){
-            return $attributeData[0]['attributes_model'];
-        } else {
-            return $data['products_model'];
-        }
-    }
-    
+
     protected function price($data)
     {
         if ($data['allow_tax'] == "0") {
@@ -149,31 +133,5 @@ class CustomerOrderItem extends BaseMapper
     protected function type($data)
     {
         return 'product';
-    }
-    
-    protected function productId($data)
-    {
-        $parentEndpointId = $data['products_id'];
-        
-        $childEndpointId = $this->db->query("SELECT products_attributes_id FROM products_attributes WHERE attributes_model = '" . $data['attributes_model'] . "'");
-        if (isset($childEndpointId)){
-            return $parentEndpointId . '_' . $childEndpointId[0]['products_attributes_id'];
-        }
-        
-        return $parentEndpointId = $data['products_id'];
-    }
-    
-    protected function name($data)
-    {
-        $attributeData = $this->db->query(
-            sprintf("SELECT * FROM orders_products_attributes WHERE orders_id = %s AND orders_products_id = %s",
-                $data['orders_id'], $data['orders_products_id']
-            )
-        );
-        if (!isset($attributeData)){
-            return $data['products_name'];
-        }
-    
-        return $data['products_name'] . ' ' . $attributeData[0]['products_options_values'];
     }
 }
