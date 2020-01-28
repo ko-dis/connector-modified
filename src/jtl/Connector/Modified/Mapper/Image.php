@@ -500,9 +500,11 @@ class Image extends BaseMapper
             $newFileName = preg_replace("([\s])", "-", $newFileName);
             $imgFileName = $newFileName . $fileEnding;
             
-            $duplicates = $this->db->query(sprintf('SELECT image_name FROM products_images
-                                    WHERE image_name LIKE "%s(%%)%s" OR image_name = "%s"
-                                    ORDER BY image_name DESC', $newFileName, $fileEnding, $imgFileName));
+            $duplicates = $this->db->query(sprintf('SELECT image_name FROM (
+                                                        SELECT products_image as image_name FROM products WHERE products_image LIKE "%s(%%)%s" OR products_image = "%s" 
+                                                        UNION 
+                                                        SELECT image_name FROM products_images WHERE image_name LIKE "%s(%%)%s" OR image_name = "%s" ) ti 
+                                                        ORDER BY image_name DESC', $newFileName, $fileEnding, $imgFileName, $newFileName, $fileEnding, $imgFileName));
             
             if (count($duplicates) > 0) {
                 $highestDuplicateIndex = $imgFileName === $duplicates[0]['image_name'] ? 1 : 0;
