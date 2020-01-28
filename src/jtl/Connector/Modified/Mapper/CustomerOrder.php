@@ -54,6 +54,8 @@ class CustomerOrder extends BaseMapper
         'klarna_invoice' => 'pm_klarna',
         'klarna_partPayment' => 'pm_klarna',
         'banktransfer' => 'pm_direct_debit',
+        'eustandardtransfer' => 'pm_prepayment',
+        'moneyorder' => 'pm_prepayment',
         'cod' => 'pm_cash_on_delivery',
         'paypal' => 'pm_paypal_standard',
         'paypal_ipn' => 'pm_paypal_standard',
